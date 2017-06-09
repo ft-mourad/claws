@@ -8,4 +8,4 @@ This tool will be considered **feature-full** when it can :
  - Start and Stop command AGAINST ALL INSTANCES MATCHING THE SEARCH FILTER
  - Add tags or retags command AGAINST ALL INSTANCES MATCHING THE SEARCH FILTER
 
-Demo:
+Demo coming soon
