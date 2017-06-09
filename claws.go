@@ -44,13 +44,9 @@ func parseInput() string {
 	}
 	parsed_arg := strings.Split(*Tag, ":")
 	keyTag, valueTag = parsed_arg[0], parsed_arg[1]
-	fmt.Println(keyTag, " : ", valueTag)
 	if *instanceId != "" && keyTag != "" {
-		fmt.Println(" -i and -k/v are mutualy exclusive. Please use one or the other\n")
 		instance_mode = "true"
 	}
-
-	fmt.Println("search : ", *instanceId, "with ", keyTag, " = ", valueTag, " in ", *regionTag, "\n")
 
 	return region
 }

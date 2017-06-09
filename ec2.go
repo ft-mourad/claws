@@ -55,7 +55,7 @@ func searchInstances(svc *ec2.EC2) {
 }
 
 func createNewTags(svc *ec2.EC2, iid string, keyTag string, valueTag string) {
-	fmt.Println("create tag -- ", keyTag, " : ", valueTag, "\n")
+	fmt.Println("\ttag -- ", keyTag, " : ", valueTag, "\n")
 	svc.CreateTags(&ec2.CreateTagsInput{
 		Resources: []*string{
 			aws.String(iid)},
@@ -69,6 +69,7 @@ func createNewTags(svc *ec2.EC2, iid string, keyTag string, valueTag string) {
 }
 
 func parseNewTags(svc *ec2.EC2, iid string) {
+	fmt.Println("Instance : ", iid)
 	for _, param := range command_param {
 		parsed_arg := strings.Split(param, ":")
 		keyTag, valueTag = parsed_arg[0], parsed_arg[1]

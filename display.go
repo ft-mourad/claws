@@ -28,7 +28,6 @@ func displaySimpleInstances(SI SimpleInstance) {
 }
 
 func displayResults() {
-	fmt.Println("------- \n")
 	for _, instance := range instances {
 		if instance.state == "running" {
 			color.Set(color.FgGreen)
@@ -39,7 +38,6 @@ func displayResults() {
 		}
 		displaySimpleInstances(instance)
 	}
-	fmt.Println("------- \n")
 }
 
 func formatResult(resp *ec2.DescribeInstancesOutput) {
