@@ -22,9 +22,8 @@ var (
 	web           = flag.Bool("w", false, "-w to start web interface")
 	keyTag        string
 	valueTag      string
-	instanceId           = flag.String("i", "", "specific instance id")
-	command              = flag.String("c", "", "start or stop command on all instances retrieved by the search")
-	format               = flag.String("f", "text", "change output format {text;json}")
-	instance_mode string = "false"
+	instanceId    = flag.String("i", "", "specific instance id")
+	command       = flag.String("c", "", "start or stop command on all instances retrieved by the search")
+	format        = flag.String("f", "text", "change output format {text;json}")
 	command_param []string
 )

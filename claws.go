@@ -14,19 +14,16 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/ft-mourad/libSimpleEC2"
 )
 
 //ran once
 func main() {
 	parseInput()
-	svc := EC2_init(region)
-
-	searchInstances(svc)
-	displayResults()
-	commandInstances(svc)
-
+	svc := SEC2.EC2_init(region)
+	_, iids := SEC2.ListInstances(svc)
+	commandInstances(svc, iids)
 }
 
 // CLI arguments
@@ -38,7 +35,6 @@ func parseInput() {
 	//process the arguments
 	flag.Parse()
 	command_param = flag.Args()
-
 	if tmp, exist := regions[*regionTag]; exist {
 		region = tmp
 	} else {
@@ -46,66 +42,42 @@ func parseInput() {
 	}
 	parsed_arg := strings.Split(*Tag, ":")
 	keyTag, valueTag = parsed_arg[0], parsed_arg[1]
-	if *instanceId != "" && keyTag != "" {
-		instance_mode = "true"
-	}
-}
 
-func searchInstances(svc *ec2.EC2) {
-	var inputFilter *ec2.DescribeInstancesInput
-	//define inputs (filters)
-	//The type DescribeInstancesInput obviously contains the inputs (here filter)
-	//for the DescribeInstances below
-	switch instance_mode {
-	case "false":
-		inputFilter = addTagFilter(keyTag, valueTag, inputFilter)
-	case "true":
-		inputFilter = addInstanceIDFilter(*instanceId, inputFilter)
-	}
-	//call
-	resp, err := svc.DescribeInstances(inputFilter)
-	if err != nil {
-		panic(err)
-	}
-	indexResult(resp)
 }
 
 //As each command ran has different config/syntax, below is the parsing.
 //For each instance found in the tag-based search
 //Build AWS object (ionput/output)
 //Create resources
-func commandInstances(svc *ec2.EC2) {
+func commandInstances(svc *ec2.EC2, iids []string) {
 	//loop through all instances
-	for _, iid := range iids {
-		// start commamd
-		if *command == "start" {
-			fmt.Println("starting- ", iid)
-			input := &ec2.StartInstancesInput{
-				InstanceIds: []*string{
-					aws.String(iid),
-				},
-				DryRun: aws.Bool(false),
+	if *command != "" {
+		for _, iid := range iids {
+			// // start commamd
+			// if *command == "start" {
+			// 	fmt.Println("STARTATATATATAT")
+			// 	SEC2.StartInstance(svc, iid)
+			// 	//stop command
+			// } else if *command == "stop" {
+			// 	fmt.Println("STOPOPOPOPOPOPO")
+			// 	SEC2.StopInstance(svc, iid)
+			// } else if *command == "tag" {
+			// 	fmt.Println(iid)
+			// }
+
+			switch {
+			case *command == "start":
+				fmt.Println("Starting instance : ", iid)
+				SEC2.StartInstance(svc, iid)
+			case *command == "stop":
+				fmt.Println("Stoping instance : ", iid)
+				SEC2.StopInstance(svc, iid)
+			case *command == "tag":
+				fmt.Println("Editing tag : ", iid)
+				parseNewTags(svc, iid)
+			default:
+				fmt.Println("unsupported command")
 			}
-			_, err := svc.StartInstances(input)
-			if err != nil {
-				fmt.Println(err)
-			}
-			//stop command
-		} else if *command == "stop" {
-			fmt.Println("stopping - ", iid)
-			input := &ec2.StopInstancesInput{
-				InstanceIds: []*string{
-					aws.String(iid),
-				},
-				DryRun: aws.Bool(false),
-			}
-			_, err := svc.StopInstances(input)
-			if err != nil {
-				fmt.Println(err)
-			}
-			//retag command
-		} else if *command == "tag" {
-			parseNewTags(svc, iid)
 		}
 	}
 }
