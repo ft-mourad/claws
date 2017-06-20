@@ -22,7 +22,8 @@ import (
 func main() {
 	parseInput()
 	svc := SEC2.EC2_init(region)
-	_, iids := SEC2.ListInstances(svc)
+	intances, iids := SEC2.ListInstances(svc)
+	displayResults(intances)
 	commandInstances(svc, iids)
 }
 
@@ -53,18 +54,6 @@ func commandInstances(svc *ec2.EC2, iids []string) {
 	//loop through all instances
 	if *command != "" {
 		for _, iid := range iids {
-			// // start commamd
-			// if *command == "start" {
-			// 	fmt.Println("STARTATATATATAT")
-			// 	SEC2.StartInstance(svc, iid)
-			// 	//stop command
-			// } else if *command == "stop" {
-			// 	fmt.Println("STOPOPOPOPOPOPO")
-			// 	SEC2.StopInstance(svc, iid)
-			// } else if *command == "tag" {
-			// 	fmt.Println(iid)
-			// }
-
 			switch {
 			case *command == "start":
 				fmt.Println("Starting instance : ", iid)

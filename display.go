@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/fatih/color"
+	"github.com/ft-mourad/libSimpleEC2"
 )
 
 func addInstanceIDFilter(iid string, param *ec2.DescribeInstancesInput) *ec2.DescribeInstancesInput {
@@ -24,11 +25,11 @@ func addInstanceIDFilter(iid string, param *ec2.DescribeInstancesInput) *ec2.Des
 	return param
 }
 
-func displaySimpleInstances(SI SimpleInstance) {
+func displaySimpleInstances(SI SEC2.SimpleInstance) {
 	fmt.Printf("%-40s\t %-60s\t %-60s\t %s\n", SI.Id, SI.Name, SI.Owner, SI.State)
 }
 
-func simpleOutput() {
+func simpleOutput(instances []SEC2.SimpleInstance) {
 	for _, instance := range instances {
 		if instance.State == "running" {
 			color.Set(color.FgGreen)
@@ -42,17 +43,17 @@ func simpleOutput() {
 	defer color.Unset()
 }
 
-func jsonOutput() {
-	jsonString := jsonConvert()
+func jsonOutput(instances []SEC2.SimpleInstance) {
+	jsonString := jsonConvert(instances)
 	fmt.Println(jsonString)
 }
 
-func displayResults() {
+func displayResults(instances []SEC2.SimpleInstance) {
 
 	if *format == "json" {
-		jsonOutput()
+		jsonOutput(instances)
 	} else {
-		simpleOutput()
+		simpleOutput(instances)
 	}
 }
 
@@ -81,7 +82,7 @@ func indexResult(resp *ec2.DescribeInstancesOutput) {
 	}
 }
 
-func jsonConvert() string {
+func jsonConvert(instances []SEC2.SimpleInstance) string {
 	jsonString, _ := json.Marshal(instances)
 	//fmt.Println(string(jsonString))
 	return string(jsonString)
