@@ -3,10 +3,10 @@ package main
 import "flag"
 
 type SimpleInstance struct {
-	id    string
-	name  string
-	state string
-	owner string
+	Id    string
+	Name  string
+	State string
+	Owner string
 }
 
 var (
@@ -19,10 +19,12 @@ var (
 	iids          []string
 	regionTag     = flag.String("r", "eu-central-1", "search tag, region")
 	Tag           = flag.String("t", "Name:*", "search tag, key")
+	web           = flag.Bool("w", false, "-w to start web interface")
 	keyTag        string
 	valueTag      string
 	instanceId           = flag.String("i", "", "specific instance id")
 	command              = flag.String("c", "", "start or stop command on all instances retrieved by the search")
+	format               = flag.String("f", "text", "change output format {text;json}")
 	instance_mode string = "false"
 	command_param []string
 )

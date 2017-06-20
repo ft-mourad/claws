@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -24,41 +25,64 @@ func addInstanceIDFilter(iid string, param *ec2.DescribeInstancesInput) *ec2.Des
 }
 
 func displaySimpleInstances(SI SimpleInstance) {
-	fmt.Printf("%-40s\t %-60s\t %-60s\t %s\n", SI.id, SI.name, SI.owner, SI.state)
+	fmt.Printf("%-40s\t %-60s\t %-60s\t %s\n", SI.Id, SI.Name, SI.Owner, SI.State)
 }
 
-func displayResults() {
+func simpleOutput() {
 	for _, instance := range instances {
-		if instance.state == "running" {
+		if instance.State == "running" {
 			color.Set(color.FgGreen)
-		} else if instance.state == "stopped" {
+		} else if instance.State == "stopped" {
 			color.Set(color.FgRed)
 		} else {
 			color.Set(color.FgYellow)
 		}
 		displaySimpleInstances(instance)
 	}
+	defer color.Unset()
 }
 
-func formatResult(resp *ec2.DescribeInstancesOutput) {
-	//var tags = make(map[string]string)
+func jsonOutput() {
+	jsonString := jsonConvert()
+	fmt.Println(jsonString)
+}
+
+func displayResults() {
+
+	if *format == "json" {
+		jsonOutput()
+	} else {
+		simpleOutput()
+	}
+}
+
+func indexResult(resp *ec2.DescribeInstancesOutput) {
 	var instance SimpleInstance
+	//looping through the results (list of instances)
 	for idx, _ := range resp.Reservations {
 		for _, inst := range resp.Reservations[idx].Instances {
-			instance.state = *inst.State.Name
-			instance.id = *inst.InstanceId
+			//create a SimpleInstance object per returned existing EC2 instance
+			instance.State = *inst.State.Name
+			instance.Id = *inst.InstanceId
+			//parse the list of tags to find the Owner and Name tags
 			for i := 0; i < len(inst.Tags); i++ {
 				if *inst.Tags[i].Key == "Name" {
-					instance.name = *inst.Tags[i].Value
+					instance.Name = *inst.Tags[i].Value
 				}
 				if *inst.Tags[i].Key == "Owner" {
-					instance.owner = *inst.Tags[i].Value
+					instance.Owner = *inst.Tags[i].Value
 				}
 			}
-			iids = append(iids, instance.id)
+			//add the Instance ID to an array of IDs
+			iids = append(iids, instance.Id)
+			//add the SimpleInstance Object to an array of SimpleInstances
 			instances = append(instances, instance)
 		}
 	}
-	displayResults()
-	defer color.Unset()
+}
+
+func jsonConvert() string {
+	jsonString, _ := json.Marshal(instances)
+	//fmt.Println(string(jsonString))
+	return string(jsonString)
 }

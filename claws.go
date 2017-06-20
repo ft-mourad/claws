@@ -20,11 +20,13 @@ import (
 
 //ran once
 func main() {
-	region = parseInput()
+	parseInput()
 	svc := EC2_init(region)
 
 	searchInstances(svc)
+	displayResults()
 	commandInstances(svc)
+
 }
 
 // CLI arguments
@@ -32,7 +34,7 @@ func main() {
 // Region: -r REGION      : could be eu-west-1 or ireland format
 // Tags:   -t KEY:VALUE   : Tag-based search, wildcard can be used
 // Command: -c start / -c stop /-c tag Owner:Batman : add or edit existing tag
-func parseInput() string {
+func parseInput() {
 	//process the arguments
 	flag.Parse()
 	command_param = flag.Args()
@@ -47,8 +49,25 @@ func parseInput() string {
 	if *instanceId != "" && keyTag != "" {
 		instance_mode = "true"
 	}
+}
 
-	return region
+func searchInstances(svc *ec2.EC2) {
+	var inputFilter *ec2.DescribeInstancesInput
+	//define inputs (filters)
+	//The type DescribeInstancesInput obviously contains the inputs (here filter)
+	//for the DescribeInstances below
+	switch instance_mode {
+	case "false":
+		inputFilter = addTagFilter(keyTag, valueTag, inputFilter)
+	case "true":
+		inputFilter = addInstanceIDFilter(*instanceId, inputFilter)
+	}
+	//call
+	resp, err := svc.DescribeInstances(inputFilter)
+	if err != nil {
+		panic(err)
+	}
+	indexResult(resp)
 }
 
 //As each command ran has different config/syntax, below is the parsing.
@@ -56,8 +75,9 @@ func parseInput() string {
 //Build AWS object (ionput/output)
 //Create resources
 func commandInstances(svc *ec2.EC2) {
-
+	//loop through all instances
 	for _, iid := range iids {
+		// start commamd
 		if *command == "start" {
 			fmt.Println("starting- ", iid)
 			input := &ec2.StartInstancesInput{
@@ -70,6 +90,7 @@ func commandInstances(svc *ec2.EC2) {
 			if err != nil {
 				fmt.Println(err)
 			}
+			//stop command
 		} else if *command == "stop" {
 			fmt.Println("stopping - ", iid)
 			input := &ec2.StopInstancesInput{
@@ -82,6 +103,7 @@ func commandInstances(svc *ec2.EC2) {
 			if err != nil {
 				fmt.Println(err)
 			}
+			//retag command
 		} else if *command == "tag" {
 			parseNewTags(svc, iid)
 		}

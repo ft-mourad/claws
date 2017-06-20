@@ -35,25 +35,6 @@ func addTagFilter(keyTag string, valueTag string, param *ec2.DescribeInstancesIn
 	return param
 }
 
-func searchInstances(svc *ec2.EC2) {
-	var inputFilter *ec2.DescribeInstancesInput
-	//define inputs (filters)
-	//The type DescribeInstancesInput obviously contains the inputs (here filter)
-	//for the DescribeInstances below
-	switch instance_mode {
-	case "false":
-		inputFilter = addTagFilter(keyTag, valueTag, inputFilter)
-	case "true":
-		inputFilter = addInstanceIDFilter(*instanceId, inputFilter)
-	}
-	//call
-	resp, err := svc.DescribeInstances(inputFilter)
-	if err != nil {
-		panic(err)
-	}
-	formatResult(resp)
-}
-
 func createNewTags(svc *ec2.EC2, iid string, keyTag string, valueTag string) {
 	fmt.Println("\ttag -- ", keyTag, " : ", valueTag, "\n")
 	svc.CreateTags(&ec2.CreateTagsInput{
